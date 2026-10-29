@@ -14,10 +14,10 @@
  */
 window.LOVE_CONFIG = {
   names: {
-    from: "Julian",
-    to: "Elena",
-    initials: "J ♥ E",
-    petName: "My Starlight"
+    from: "Aman",
+    to: "Bella",
+    initials: "A ♥ B",
+    petName: "My Cutie"
   },
 
   // Relationship & special dates (ISO YYYY-MM-DDTHH:mm:ss)
