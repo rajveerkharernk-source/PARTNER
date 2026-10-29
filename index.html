@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Every Universe Leads Back to You — 3D Interactive Love Experience</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Great+Vibes&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- Custom Cursor, Ambient Sky/Particles, Cursor Trail & Fireworks -->
+  <div id="cursor-glow" aria-hidden="true"></div>
+  <canvas id="ambient-bg-canvas" aria-hidden="true"></canvas>
+  <canvas id="cursor-trail-canvas" aria-hidden="true"></canvas>
+  <canvas id="fireworks-canvas" aria-hidden="true"></canvas>
+  <div class="vignette-layer" aria-hidden="true"></div>
+  <div class="film-grain" aria-hidden="true"></div>
+  <div id="scene-transition-overlay" aria-hidden="true">
+    <div class="script-text" id="transition-caption">♥</div>
+  </div>
+
+  <!-- Discreet HUD Toast -->
+  <div id="hud-toast" role="status" aria-live="polite">Welcome to your interactive love story ♥</div>
+
+  <!-- Hidden File Input for Live Edit Mode -->
+  <input type="file" id="live-media-file-input" accept="image/*,video/*" style="display:none" onchange="handleLiveFileInput(event)" />
+
+  <!-- Top Navigation & Global Controls HUD -->
+  <header id="top-hud" role="banner">
+    <div class="hud-brand">
+      <span style="color:var(--accent-rose)">♥</span>
+      <span id="hud-couple-names">Julian &amp; Elena</span>
+      <span class="eyebrow" id="hud-scene-counter" style="margin-left:0.35rem">1 / 13</span>
+    </div>
+
+    <nav class="hud-progress-wrap" aria-label="Scene progress">
+      <button type="button" class="btn-pill" id="btn-top-prev" onclick="prevScene()" title="Previous Scene (Left Arrow)">‹ Back</button>
+      <div class="scene-dots" id="hud-scene-dots" role="tablist" aria-label="Scenes 1 to 13"></div>
+      <button type="button" class="btn-pill" id="btn-top-skip" onclick="nextScene()" title="Skip to Next Scene (S or Right Arrow)">Skip ›</button>
+    </nav>
+
+    <div class="hud-actions">
+      <button type="button" class="btn-pill" id="btn-story-autoplay" onclick="toggleStoryAutoplay()" title="Play the whole story automatically">▶ Story</button>
+      <button type="button" class="btn-pill" id="btn-skip-intros" onclick="toggleSkipAllIntros()" title="Skip all intros for returning visitors">⚡ Fast</button>
+      <button type="button" class="btn-pill" id="btn-theme-toggle" onclick="toggleThemeMode()" title="Switch Midnight / Paper Theme">◐ Theme</button>
+      <button type="button" class="btn-pill" id="btn-motion-toggle" onclick="toggleReducedMotion()" title="Toggle Motion On/Off">✦ Motion</button>
+      <button type="button" class="btn-pill" id="btn-audio-mute" onclick="toggleGlobalMute()" title="Mute / Unmute Sound">🔊 Sound</button>
+      <button type="button" class="btn-pill" id="btn-lock-again" onclick="lockExperienceAgain()" style="display:none" title="Lock Passcode Screen Again">🔒 Lock</button>
+      <button type="button" class="btn-pill" id="btn-help-readme" onclick="openReadmeModal()" title="How to Customise & Controls">? Guide</button>
+    </div>
+  </header>
+
+  <!-- Main 13-Scene Interactive Stage -->
+  <main id="app-stage" role="main">
+
+    <!-- ===================================================================
+         SCENE 1: LOADING SCREEN (Heart Fill Percentage + ECG Heartbeat)
+         =================================================================== -->
+    <section id="scene-1" class="scene-panel active" aria-label="Scene 1: Loading Screen">
+      <div style="max-width:520px;margin:0 auto;text-align:center;padding:1.5rem 0;">
+        <p class="eyebrow" id="s1-eyebrow">CHAPTER I · PREPARING KEEP-SAKES</p>
+        <h1 class="editorial-title" style="margin:0.5rem 0 0.75rem;">
+          Tuning the <em>Heartstrings</em>
+        </h1>
+        <p class="editorial-subtitle" style="margin-bottom:1.5rem;">
+          Loading 3D memories, midnight constellations, and a living meadow grown just for you…
+        </p>
+
+        <!-- Heart Fill SVG + ECG Line -->
+        <div style="position:relative;width:190px;height:180px;margin:0 auto 1rem;">
+          <svg viewBox="0 0 200 185" width="190" height="180" aria-label="Heart loading indicator">
+            <defs>
+              <clipPath id="heart-load-clip">
+                <rect id="heart-load-rect" x="0" y="185" width="200" height="185" />
+              </clipPath>
+              <linearGradient id="heart-fill-grad" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0%" stop-color="#ff8aa1" />
+                <stop offset="100%" stop-color="#f0be72" />
+              </linearGradient>
+            </defs>
+            <path d="M100 170 C100 170 20 118 20 62 C20 30 46 12 72 12 C88 12 100 24 100 36 C100 24 112 12 128 12 C154 12 180 30 180 62 C180 118 100 170 100 170 Z"
+                  fill="rgba(255,255,255,0.03)" stroke="var(--accent-gold)" stroke-width="2.5" />
+            <path d="M100 170 C100 170 20 118 20 62 C20 30 46 12 72 12 C88 12 100 24 100 36 C100 24 112 12 128 12 C154 12 180 30 180 62 C180 118 100 170 100 170 Z"
+                  fill="url(#heart-fill-grad)" clip-path="url(#heart-load-clip)" />
+          </svg>
+          <div id="loading-pct-text" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:2.1rem;font-weight:700;color:var(--text-primary);text-shadow:0 2px 12px rgba(0,0,0,0.7);">
+            0%
+          </div>
+        </div>
+
+        <!-- ECG Heartbeat SVG that morphs into a pulse -->
+        <svg viewBox="0 0 360 60" width="320" height="54" style="margin:0 auto 1.2rem;display:block;overflow:visible" aria-hidden="true">
+          <path id="ecg-line-path"
+                d="M 10 35 L 95 35 L 112 18 L 126 52 L 142 8 L 158 50 L 172 28 L 185 35 C 185 22 202 15 210 27 C 218 15 235 22 235 35 C 235 48 210 56 210 56 C 210 56 185 48 185 35 L 350 35"
+                fill="none" stroke="var(--accent-rose)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                stroke-dasharray="480" stroke-dashoffset="480" />
+        </svg>
+
+        <div style="display:flex;gap:0.65rem;justify-content:center;flex-wrap:wrap;">
+          <button type="button" class="btn-pill primary" id="btn-enter-from-load" onclick="goToScene(2)">
+            Unlock Secret Gift ›
+          </button>
+          <button type="button" class="btn-pill" id="btn-replay-load" onclick="replayLoadingScene()">
+            ↺ Replay Fill
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 2: PASSCODE LOCK (SHA-256 Keypad + Hints + Heart Burst)
+         =================================================================== -->
+    <section id="scene-2" class="scene-panel" aria-label="Scene 2: Passcode Lock">
+      <div class="passcode-card" id="passcode-card-box">
+        <div style="font-size:2rem;margin-bottom:0.25rem;" id="lock-shackle-icon" aria-hidden="true">🔒</div>
+        <p class="eyebrow">CHAPTER II · SECRET KEEP-SAKE LOCK</p>
+        <h2 class="editorial-title" style="font-size:2.1rem;margin:0.35rem 0;">
+          Enter Our <em>Special Code</em>
+        </h2>
+        <p style="font-size:0.88rem;color:var(--text-secondary);" id="passcode-hint-text">
+          Hint: our special date — Valentine’s month &amp; day (try <strong>0214</strong>)
+        </p>
+        <p style="font-size:0.8rem;color:var(--accent-gold);margin-top:0.35rem;display:none;" id="passcode-second-hint">
+          Friendly 2nd hint: Type 0 · 2 · 1 · 4 on the keypad ✨
+        </p>
+
+        <div class="passcode-dots" id="passcode-dots-container" aria-label="Passcode digits entered"></div>
+
+        <div class="keypad-grid" role="group" aria-label="Passcode keypad">
+          <button type="button" class="keypad-btn" onclick="pressPasscodeDigit('1')">1</button>
+          <button type="button" class="keypad-btn" onclick="pressPasscodeDigit('2')">2</button>
+          <button type="button" class="keypad-btn" onclick="pressPasscodeDigit('3')">3</button>
+          <button type="button" class="keypad-btn" onclick="pressPasscodeDigit('4')">4</button>
+          <button type="button" class="keypad-btn" onclick="pressPasscodeDigit('5')">5</button>
+          <button type="button" class="keypad-btn" onclick="pressPasscodeDigit('6')">6</button>
+          <button type="button" class="keypad-btn" onclick="pressPasscodeDigit('7')">7</button>
+          <button type="button" class="keypad-btn" onclick="pressPasscodeDigit('8')">8</button>
+          <button type="button" class="keypad-btn" onclick="pressPasscodeDigit('9')">9</button>
+          <button type="button" class="keypad-btn action-key" onclick="deletePasscodeDigit()">Delete</button>
+          <button type="button" class="keypad-btn" onclick="pressPasscodeDigit('0')">0</button>
+          <button type="button" class="keypad-btn action-key" style="color:var(--accent-gold);border-color:var(--border-gold);" onclick="submitPasscode()">Submit</button>
+        </div>
+
+        <div style="margin-top:1.1rem;display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap;">
+          <button type="button" class="btn-pill" onclick="fillDemoPasscode()">✨ Auto-Fill 0214</button>
+          <button type="button" class="btn-pill" onclick="testWrongPasscode()">Test Wrong Code</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 3: HEART OF WORDS INTRO (Canvas Outline Trace + Cascade)
+         =================================================================== -->
+    <section id="scene-3" class="scene-panel" aria-label="Scene 3: Heart of Words">
+      <div style="text-align:center;margin-bottom:0.85rem;">
+        <p class="eyebrow">CHAPTER III · HEART OF WORDS</p>
+        <h2 class="editorial-title" id="s3-hero-title">Every Word Traces Back to <em>You</em></h2>
+        <p class="editorial-subtitle" id="s3-hero-sub">
+          Watch our favourite words trace the outline of a heart, cascade to fill it, and pulse like a living heartbeat.
+        </p>
+      </div>
+
+      <div id="heart-words-stage" style="position:relative;max-width:1040px;height:min(72vh,600px);min-height:460px;margin:0 auto;border-radius:24px;overflow:hidden;border:1px solid rgba(255,42,109,0.45);background:#000000;box-shadow:0 20px 60px rgba(0,0,0,0.85), 0 0 40px rgba(255,42,109,0.18);">
+        <canvas id="bgCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:1;"></canvas>
+        <canvas id="heart-words-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;display:block;z-index:2;cursor:default;" onclick="triggerHeartWordsPulseBoost()"></canvas>
+        <div style="position:absolute;bottom:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;pointer-events:none;">
+          <span class="eyebrow" style="background:rgba(4,7,17,0.75);padding:4px 10px;border-radius:99px;pointer-events:auto;" id="heart-words-status">Tracing outline…</span>
+          <div style="display:flex;gap:0.4rem;pointer-events:auto;">
+            <button type="button" class="btn-pill" onclick="restartHeartOfWords()">↺ Replay Trace</button>
+            <button type="button" class="btn-pill" onclick="fillHeartWordsInstantly()">⚡ Fill All</button>
+            <button type="button" class="btn-pill primary" onclick="nextScene()">Date Quiz ›</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 4: DATE QUIZ / VERIFICATION (Cameo Rosette + Custom Picker)
+         =================================================================== -->
+    <section id="scene-4" class="scene-panel" aria-label="Scene 4: Date Quiz">
+      <div class="cameo-card" id="quiz-cameo-card">
+        <p class="eyebrow">CHAPTER IV · MEMORY VERIFICATION</p>
+        <h2 class="editorial-title" style="font-size:2.2rem;margin:0.35rem 0 0.9rem;" id="quiz-heading">
+          Do You Remember <em>Our Beginning?</em>
+        </h2>
+
+        <!-- Scalloped Rosette Cameo Frame with Cartoon/GIF Slot -->
+        <div class="rosette-frame" data-editable-media="quiz-cartoon" onclick="handleMediaSlotClick('quiz-cartoon', 5)" title="Click to view">
+          <div class="rosette-inner">
+            <img id="quiz-cartoon-img" alt="Cute couple cameo illustration" src="" />
+          </div>
+        </div>
+        <p class="script-text" style="font-size:1.45rem;margin-bottom:1rem;" id="quiz-cartoon-caption">
+          Us on day one — nervous smiles &amp; warm coffee
+        </p>
+
+        <p style="font-size:0.92rem;color:var(--text-secondary);margin-bottom:0.85rem;" id="quiz-prompt-label">
+          Select the exact date our story officially began:
+        </p>
+
+        <!-- Custom Date Picker Controls -->
+        <div style="display:flex;justify-content:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+          <select id="quiz-month-select" aria-label="Month" class="btn-pill" style="font-size:0.9rem;padding:0.5rem 0.75rem;">
+            <option value="01">January</option>
+            <option value="02" selected>February</option>
+            <option value="03">March</option>
+            <option value="04">April</option>
+            <option value="05">May</option>
+            <option value="06">June</option>
+            <option value="07">July</option>
+            <option value="08">August</option>
+            <option value="09">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+
+          <select id="quiz-day-select" aria-label="Day" class="btn-pill" style="font-size:0.9rem;padding:0.5rem 0.75rem;">
+            <option value="01">1</option><option value="02">2</option><option value="03">3</option>
+            <option value="04">4</option><option value="05">5</option><option value="06">6</option>
+            <option value="07">7</option><option value="08">8</option><option value="09">9</option>
+            <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+            <option value="13">13</option><option value="14" selected>14</option><option value="15">15</option>
+            <option value="16">16</option><option value="17">17</option><option value="18">18</option>
+            <option value="19">19</option><option value="20">20</option><option value="21">21</option>
+            <option value="22">22</option><option value="23">23</option><option value="24">24</option>
+            <option value="25">25</option><option value="26">26</option><option value="27">27</option>
+            <option value="28">28</option><option value="29">29</option><option value="30">30</option>
+            <option value="31">31</option>
+          </select>
+
+          <select id="quiz-year-select" aria-label="Year" class="btn-pill" style="font-size:0.9rem;padding:0.5rem 0.75rem;">
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022" selected>2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+          </select>
+
+          <button type="button" class="btn-pill primary" onclick="checkDateQuizAnswer()">Verify Date ♥</button>
+        </div>
+
+        <div style="display:flex;justify-content:center;gap:0.45rem;flex-wrap:wrap;">
+          <button type="button" class="btn-pill" onclick="setQuizPreset('2022-02-14', true)">✨ Feb 14, 2022 (Correct)</button>
+          <button type="button" class="btn-pill" onclick="setQuizPreset('2023-04-01', true)">😜 Try Wrong Date</button>
+        </div>
+
+        <p id="quiz-feedback-msg" style="margin-top:1rem;font-weight:500;min-height:1.6em;color:var(--accent-gold);"></p>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 5: MYSTERY GIFT BOXES + RUNAWAY "NO" BUTTON
+         =================================================================== -->
+    <section id="scene-5" class="scene-panel" aria-label="Scene 5: Mystery Gift Boxes">
+      <div style="text-align:center;">
+        <p class="eyebrow">CHAPTER V · SECRET SURPRISES</p>
+        <h2 class="editorial-title">Three <em>Mystery Boxes</em></h2>
+        <p class="editorial-subtitle" id="s5-mystery-sub">
+          Choose one to unseal its 3D lid — each box holds a different surprise and a shortcut into our story.
+        </p>
+      </div>
+
+      <div class="mystery-grid">
+        <!-- Box 1: Photo Surprise -->
+        <div class="gift-box-card" id="mystery-box-1" onclick="openMysteryBox(1)" role="button" tabindex="0" aria-label="Mystery Box 1: Secret Polaroid">
+          <div class="gift-3d-wrap">
+            <svg viewBox="0 0 120 120" width="110" height="110">
+              <g class="gift-lid">
+                <rect x="14" y="26" width="92" height="22" rx="6" fill="#ff8aa1" stroke="#f0be72" stroke-width="2"/>
+                <path d="M60 26 C42 6 26 18 48 26 M60 26 C78 6 94 18 72 26" fill="none" stroke="#f0be72" stroke-width="4" stroke-linecap="round"/>
+              </g>
+              <rect x="20" y="48" width="80" height="58" rx="8" fill="#182240" stroke="#f0be72" stroke-width="2"/>
+              <rect x="54" y="26" width="12" height="80" fill="#f0be72" opacity="0.85"/>
+            </svg>
+          </div>
+          <span class="eyebrow">BOX I · KEEPSAKE PHOTO</span>
+          <h3 style="font-family:var(--font-serif);font-size:1.4rem;margin:0.25rem 0;">Golden Hour Polaroid</h3>
+          <p style="font-size:0.84rem;color:var(--text-secondary);" id="box-1-status">Tap to lift the 3D ribbon lid</p>
+        </div>
+
+        <!-- Box 2: Video / Film Reel Surprise -->
+        <div class="gift-box-card" id="mystery-box-2" onclick="openMysteryBox(2)" role="button" tabindex="0" aria-label="Mystery Box 2: Super-8 Memory Reel">
+          <div class="gift-3d-wrap">
+            <svg viewBox="0 0 120 120" width="110" height="110">
+              <g class="gift-lid">
+                <rect x="14" y="26" width="92" height="22" rx="6" fill="#f0be72" stroke="#ff8aa1" stroke-width="2"/>
+                <path d="M60 26 C42 6 26 18 48 26 M60 26 C78 6 94 18 72 26" fill="none" stroke="#ff8aa1" stroke-width="4" stroke-linecap="round"/>
+              </g>
+              <rect x="20" y="48" width="80" height="58" rx="8" fill="#1f183b" stroke="#ff8aa1" stroke-width="2"/>
+              <rect x="54" y="26" width="12" height="80" fill="#ff8aa1" opacity="0.85"/>
+            </svg>
+          </div>
+          <span class="eyebrow">BOX II · CINEMA REEL</span>
+          <h3 style="font-family:var(--font-serif);font-size:1.4rem;margin:0.25rem 0;">Super-8 Starlight Reel</h3>
+          <p style="font-size:0.84rem;color:var(--text-secondary);" id="box-2-status">Tap to play our motion memory</p>
+        </div>
+
+        <!-- Box 3: Love Note & Garden Pass -->
+        <div class="gift-box-card" id="mystery-box-3" onclick="openMysteryBox(3)" role="button" tabindex="0" aria-label="Mystery Box 3: Secret Love Voucher">
+          <div class="gift-3d-wrap">
+            <svg viewBox="0 0 120 120" width="110" height="110">
+              <g class="gift-lid">
+                <rect x="14" y="26" width="92" height="22" rx="6" fill="#8e6ce8" stroke="#f0be72" stroke-width="2"/>
+                <path d="M60 26 C42 6 26 18 48 26 M60 26 C78 6 94 18 72 26" fill="none" stroke="#f0be72" stroke-width="4" stroke-linecap="round"/>
+              </g>
+              <rect x="20" y="48" width="80" height="58" rx="8" fill="#14233c" stroke="#f0be72" stroke-width="2"/>
+              <rect x="54" y="26" width="12" height="80" fill="#f0be72" opacity="0.85"/>
+            </svg>
+          </div>
+          <span class="eyebrow">BOX III · SECRET VOUCHER</span>
+          <h3 style="font-family:var(--font-serif);font-size:1.4rem;margin:0.25rem 0;">Midnight Wish Pass</h3>
+          <p style="font-size:0.84rem;color:var(--text-secondary);" id="box-3-status">Tap to reveal your surprise</p>
+        </div>
+      </div>
+
+      <!-- Yes / Runaway No Pill Question -->
+      <div class="runaway-arena" id="runaway-arena-box">
+        <p class="eyebrow">A VERY SERIOUS QUESTION</p>
+        <p style="font-family:var(--font-serif);font-size:1.45rem;margin:0.35rem 0 1rem;" id="runaway-question-text">
+          Before we go further… will you let me spoil you today, tomorrow, and for the next hundred years?
+        </p>
+        <div style="display:flex;justify-content:center;align-items:center;gap:1rem;min-height:46px;position:relative;">
+          <button type="button" class="btn-pill primary" style="font-size:0.95rem;padding:0.55rem 1.4rem;" onclick="acceptRunawayYes()">
+            Yes, Forever! ♥
+          </button>
+          <button type="button" class="btn-pill" id="btn-runaway-no"
+                  onmouseenter="dodgeRunawayNo(event)"
+                  ontouchstart="dodgeRunawayNo(event)"
+                  onclick="dodgeRunawayNo(event)">
+            No 🙈
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 6: BOY & GIRL OUTLINE STORY (5 SVG Mini Scenes + Pen Cursor)
+         =================================================================== -->
+    <section id="scene-6" class="scene-panel" aria-label="Scene 6: Boy and Girl Outline Story">
+      <div style="text-align:center;margin-bottom:0.85rem;">
+        <p class="eyebrow">CHAPTER VI · SINGLE-LINE INK STORY</p>
+        <h2 class="editorial-title">Five Little <em>Chapters of Us</em></h2>
+        <p class="editorial-subtitle">
+          Tap the characters to make them wave or blush, drag to tilt the parallax stage, or click the glowing heart between them.
+        </p>
+      </div>
+
+      <!-- Mini-scene step selector pills -->
+      <div style="display:flex;justify-content:center;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.85rem;">
+        <button type="button" class="btn-pill active-toggle" id="story-step-btn-0" onclick="selectOutlineMiniScene(0)">1 · Midnight Rooftop</button>
+        <button type="button" class="btn-pill" id="story-step-btn-1" onclick="selectOutlineMiniScene(1)">2 · Holding Hands</button>
+        <button type="button" class="btn-pill" id="story-step-btn-2" onclick="selectOutlineMiniScene(2)">3 · The Flower</button>
+        <button type="button" class="btn-pill" id="story-step-btn-3" onclick="selectOutlineMiniScene(3)">4 · Shared Umbrella</button>
+        <button type="button" class="btn-pill" id="story-step-btn-4" onclick="selectOutlineMiniScene(4)">5 · Heart Moon</button>
+      </div>
+
+      <!-- Interactive SVG + Sparkle Canvas Stage -->
+      <div id="outline-story-stage"
+           style="position:relative;max-width:820px;height:420px;margin:0 auto;border-radius:24px;background:#04060f;border:1px solid var(--border-gold);overflow:hidden;box-shadow:var(--shadow-soft);touch-action:none;">
+        <!-- Optional Custom Artwork Override -->
+        <img id="custom-character-override-img" alt="Custom couple artwork" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:2;" />
+
+        <!-- SVG Line-Art Stage -->
+        <svg id="outline-story-svg" viewBox="0 0 800 420" width="100%" height="100%" style="position:relative;z-index:3;display:block;">
+          <defs>
+            <radialGradient id="warm-fill-glow" cx="50%" cy="45%" r="55%">
+              <stop offset="0%" stop-color="rgba(255,138,161,0.38)" />
+              <stop offset="55%" stop-color="rgba(240,190,114,0.18)" />
+              <stop offset="100%" stop-color="rgba(4,7,17,0)" />
+            </radialGradient>
+          </defs>
+          <rect id="outline-warm-bg" x="0" y="0" width="800" height="420" fill="url(#warm-fill-glow)" opacity="0" style="transition:opacity 1.2s ease;" />
+          <g id="outline-scene-backdrop"></g>
+          <g id="outline-boy-group" style="cursor:pointer;" onclick="triggerCharacterReaction('boy')"></g>
+          <g id="outline-girl-group" style="cursor:pointer;" onclick="triggerCharacterReaction('girl')"></g>
+          <g id="outline-center-heart" style="cursor:pointer;" onclick="advanceOutlineOrNextScene()">
+            <path d="M400 215 C400 215 376 196 376 180 C376 170 385 164 393 164 C397 164 400 168 400 172 C400 168 403 164 407 164 C415 164 424 170 424 180 C424 196 400 215 400 215 Z"
+                  fill="rgba(255,138,161,0.28)" stroke="#ff8aa1" stroke-width="2" />
+          </g>
+        </svg>
+
+        <!-- Pen-Tip & Micro-Sparkle Overlay Canvas -->
+        <canvas id="outline-sparkle-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4;"></canvas>
+
+        <!-- Bottom Bar inside Stage -->
+        <div style="position:absolute;bottom:12px;left:14px;right:14px;z-index:6;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+          <p id="outline-caption-text" style="font-family:var(--font-serif);font-size:1.1rem;color:#f8edd9;background:rgba(4,7,17,0.78);padding:4px 12px;border-radius:99px;">
+            1 / 5 · Sitting on a rooftop at midnight under shooting stars
+          </p>
+          <div style="display:flex;gap:0.4rem;">
+            <button type="button" class="btn-pill" onclick="replayCurrentOutlineScene()">✎ Redraw</button>
+            <button type="button" class="btn-pill" id="btn-outline-autoplay" onclick="toggleOutlineAutoplay()">⏸ Auto</button>
+            <button type="button" class="btn-pill primary" onclick="advanceOutlineOrNextScene()">Next ›</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 7: A LIVING GARDEN (Procedural Meadow + Ambience + Bouquet Game)
+         =================================================================== -->
+    <section id="scene-7" class="scene-panel" aria-label="Scene 7: A Living Garden">
+      <div style="text-align:center;margin-bottom:0.75rem;">
+        <p class="eyebrow">CHAPTER VII · INTERACTIVE BOTANICAL MEADOW</p>
+        <h2 class="editorial-title">A <em>Living Garden</em> for You</h2>
+        <p class="editorial-subtitle">
+          Tap to plant roses, tulips, sunflowers &amp; lotus. Long-press for a full bouquet, or drag across the stems to bend them in the wind.
+        </p>
+      </div>
+
+      <!-- Garden Controls Toolbar -->
+      <div style="display:flex;justify-content:center;gap:0.45rem;flex-wrap:wrap;margin-bottom:0.8rem;">
+        <button type="button" class="btn-pill" id="garden-sky-day" onclick="setGardenTimeOfDay('day')">☀ Day</button>
+        <button type="button" class="btn-pill active-toggle" id="garden-sky-dusk" onclick="setGardenTimeOfDay('dusk')">🌅 Golden Dusk</button>
+        <button type="button" class="btn-pill" id="garden-sky-midnight" onclick="setGardenTimeOfDay('midnight')">🌙 Midnight</button>
+        <button type="button" class="btn-pill" id="btn-garden-audio" onclick="toggleGardenAmbience()">🎐 Garden Ambience</button>
+        <button type="button" class="btn-pill" onclick="plantRandomBouquetBurst()">🌸 Plant Bouquet</button>
+        <button type="button" class="btn-pill gold" onclick="openBouquetBuilderModal()">💐 Make a Bouquet Gift</button>
+      </div>
+
+      <!-- Layered Parallax Garden Stage -->
+      <div id="living-garden-stage"
+           style="position:relative;max-width:960px;height:440px;margin:0 auto;border-radius:24px;overflow:hidden;border:1px solid var(--border-gold);box-shadow:var(--shadow-soft);touch-action:none;">
+        <canvas id="living-garden-canvas" style="width:100%;height:100%;display:block;cursor:crosshair;"></canvas>
+        <div style="position:absolute;bottom:10px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;pointer-events:none;font-family:var(--font-mono);font-size:0.72rem;color:#f8edd9;">
+          <span style="background:rgba(4,7,17,0.7);padding:4px 10px;border-radius:99px;" id="garden-flower-count">Blooms: 28 · Tap soil to plant</span>
+          <button type="button" class="btn-pill primary" style="pointer-events:auto;" onclick="nextScene()">3D Memory Space ›</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 8: 3D MEMORY SPACE + POLAROID CLOTHESLINE + MEMORIES BOARD
+         =================================================================== -->
+    <section id="scene-8" class="scene-panel" aria-label="Scene 8: 3D Memory Space and Polaroid Clothesline">
+      <div style="text-align:center;margin-bottom:1rem;">
+        <p class="eyebrow">CHAPTER VIII · THREE.JS KEEPSAKES &amp; SCRAPBOOK</p>
+        <h2 class="editorial-title">Little Moments &amp; <em>Our Clothesline</em></h2>
+        <p class="editorial-subtitle">
+          Move your cursor across the 3D floating hearts and rings, click any memory card to grow vines around it, or open the fullscreen Memories Board.
+        </p>
+      </div>
+
+      <!-- Three.js 3D Interactive Hero Container -->
+      <div id="three-memory-hero"
+           style="position:relative;width:100%;height:270px;border-radius:24px;overflow:hidden;border:1px solid var(--border-gold);background:#050918;margin-bottom:1.75rem;box-shadow:var(--shadow-soft);">
+        <canvas id="three-hero-canvas" style="width:100%;height:100%;display:block;"></canvas>
+        <div style="position:absolute;bottom:12px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;pointer-events:none;">
+          <span class="eyebrow" style="background:rgba(4,7,17,0.75);padding:4px 10px;border-radius:99px;">3D Interactive Space · Drag or hover shapes</span>
+          <div style="display:flex;gap:0.4rem;pointer-events:auto;">
+            <button type="button" class="btn-pill" onclick="cycle3DShapeFilter()">✦ Filter 3D Shapes</button>
+            <button type="button" class="btn-pill gold" onclick="openFullscreenMemoriesBoard()">🗂 Fullscreen Memories Board</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editorial Memory Wall (4 to 8 varied cards) -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;flex-wrap:wrap;gap:0.5rem;">
+        <span class="eyebrow">EDITORIAL MEMORY WALL (CLICK ANY CARD TO OPEN &amp; GROW VINES)</span>
+        <button type="button" class="btn-pill" onclick="addNewMemoryCardPrompt()">+ Add Memory</button>
+      </div>
+      <div class="memory-wall-grid" id="editorial-memory-wall"></div>
+
+      <!-- Hanging Polaroid Clothesline -->
+      <div class="clothesline-stage">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+          <span class="eyebrow">HANGING POLAROID CLOTHESLINE · SWAYING IN THE BREEZE</span>
+          <span style="font-family:var(--font-script);font-size:1.35rem;color:var(--accent-rose);">Our Little Memories ♥</span>
+        </div>
+        <div class="clothesline-wire" aria-hidden="true"></div>
+        <div class="polaroid-row" id="polaroid-clothesline-row"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 9: MIDNIGHT ROOFTOP SKETCH (OLED Pure Black SVG Line Art)
+         =================================================================== -->
+    <section id="scene-9" class="scene-panel fullscreen-oled" aria-label="Scene 9: Midnight Rooftop Sketch">
+      <div style="text-align:center;margin-bottom:0.65rem;">
+        <p class="eyebrow">CHAPTER IX · PURE OLED MANGA LINE-ART FILM</p>
+        <h2 class="editorial-title" style="color:#f8edd9;">Midnight <em>Rooftop</em></h2>
+        <p class="editorial-subtitle" style="color:rgba(248,237,217,0.72);">
+          7.5s continuous silhouette · 4.2s 201-stroke manga details · interactive sky, moon &amp; couple whispers. Shortcuts: [Space] Pause, [R] Replay, [1/2/3] Speed.
+        </p>
+      </div>
+
+      <div id="rooftop-stage-box"
+           style="position:relative;max-width:1080px;height:min(74vh,620px);min-height:460px;margin:0 auto;background:#000000;border:1px solid rgba(255,255,255,0.22);border-radius:22px;overflow:hidden;cursor:pointer;user-select:none;"
+           onclick="handleRooftopStageClick(event)">
+
+        <!-- Interactive Romantic Whisper Box -->
+        <div id="rooftop-whisper-box" class="rooftop-whisper-card" onclick="event.stopPropagation(); cycleRooftopWhisper()">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
+            <span class="eyebrow" id="rooftop-whisper-tag" style="color:#f0be72;font-size:0.66rem;">MIDNIGHT WHISPER · I / VI (TAP COUPLE, MOON OR SKY)</span>
+            <span style="font-family:var(--font-mono);font-size:0.66rem;color:rgba(255,255,255,0.6);">Tap card for next thought ›</span>
+          </div>
+          <p id="rooftop-whisper-text" style="font-family:var(--font-serif);font-style:italic;font-size:clamp(1.02rem,1.8vw,1.24rem);color:#ffffff;line-height:1.45;">
+            “Look how quiet the city gets from up here…” — In a world of eight million lights, the calmest place was always right beside you.
+          </p>
+        </div>
+
+        <!-- SVG Line Art Layer (1672x941 Widescreen / Responsive 9:16 Portrait) -->
+        <svg id="rooftop-sketch-svg" class="sketch-svg" viewBox="0 0 1672 941" width="100%" height="100%" style="position:absolute;inset:0;width:100%;height:100%;display:block;background:#000000;pointer-events:none;shape-rendering:geometricPrecision;">
+          <defs>
+            <radialGradient id="pen-glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+              <stop offset="45%" stop-color="#ffffff" stop-opacity="0.8" />
+              <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+            </radialGradient>
+          </defs>
+
+          <!-- Phase 1 Layer: Continuous Outer Silhouette (~7.5s) -->
+          <g id="rooftop-silhouette-group" class="layer-phase1"></g>
+
+          <!-- Phase 2 Layer: 201 Authentic Manga Linework Details (~4.2s) -->
+          <g id="rooftop-details-group" class="layer-phase2"></g>
+
+          <!-- Stars & User-Planted Wishes Layer -->
+          <g id="rooftop-stars-group" class="layer-stars"></g>
+
+          <!-- Interactive Floating Effects Layer (Moon Halo & Couple Heart Pulse) -->
+          <g id="rooftop-interactive-fx"></g>
+
+          <!-- Precision Pen Tip Cursor -->
+          <g id="pen-cursor" class="pen-cursor" opacity="0">
+            <circle id="pen-halo" cx="0" cy="0" r="5.5" fill="url(#pen-glow)" />
+            <circle id="pen-dot" cx="0" cy="0" r="2.0" fill="#ffffff" />
+          </g>
+        </svg>
+
+        <!-- Canvas Layer for Fast Micro-Sparkle Particle Trail -->
+        <canvas id="rooftop-sparkle-canvas" class="particle-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+
+        <!-- Discreet Status Toast (Auto-fades on pure OLED black) -->
+        <div id="status-toast" class="status-toast" aria-live="polite"></div>
+
+        <!-- Discreet Auto-Hiding HUD & Controls -->
+        <div id="rooftop-hud-bar" onclick="event.stopPropagation()" style="position:absolute;bottom:12px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;transition:opacity 0.5s ease;z-index:16;">
+          <span class="eyebrow" id="rooftop-phase-label" style="background:rgba(12,12,18,0.85);padding:4px 12px;border-radius:99px;color:#ffffff;border:1px solid rgba(255,255,255,0.15);">Phase 1: Drawing Silhouette…</span>
+          <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+            <button type="button" class="btn-pill" id="btn-rooftop-pause" onclick="toggleRooftopPause()">⏸ Pause (Space)</button>
+            <button type="button" class="btn-pill" onclick="startRooftopSketch(1)">↺ Replay (R)</button>
+            <button type="button" class="btn-pill" id="btn-rooftop-speed" onclick="cycleRooftopSpeed()">1x Speed</button>
+            <button type="button" class="btn-pill" onclick="cycleRooftopWhisper()">💬 Next Whisper</button>
+            <button type="button" class="btn-pill primary" onclick="nextScene()">Time Together ›</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 10: REALISTIC ANALOG CLOCK & "TIME TOGETHER" COUNTER
+         =================================================================== -->
+    <section id="scene-10" class="scene-panel" aria-label="Scene 10: Clock and Time Together Counter">
+      <div style="text-align:center;">
+        <p class="eyebrow">CHAPTER X · CHRONOMETER OF US</p>
+        <h2 class="editorial-title">Every Second <em>Together</em></h2>
+        <p class="editorial-subtitle" id="s10-sub">
+          Counting every heartbeat since February 14, 2022 at 7:30 PM.
+        </p>
+
+        <!-- Realistic Analog Clock -->
+        <div class="analog-clock-housing" style="margin-top:1.25rem;" onclick="nextScene()" title="Click clock to advance to Birthday Cake">
+          <div class="analog-clock-dial" id="analog-clock-dial">
+            <div class="clock-glass-reflection"></div>
+            <div class="clock-hand hour" id="clock-hand-hour"></div>
+            <div class="clock-hand minute" id="clock-hand-minute"></div>
+            <div class="clock-hand second" id="clock-hand-second"></div>
+            <div class="clock-center-pin"></div>
+          </div>
+        </div>
+
+        <!-- Digital Clock Readout -->
+        <div style="font-family:var(--font-mono);font-size:1.1rem;color:var(--accent-rose);letter-spacing:0.14em;margin-bottom:0.75rem;" id="digital-clock-readout">
+          00:00:00
+        </div>
+
+        <!-- Live Time Together Counter Grid -->
+        <div class="counter-grid" aria-live="polite">
+          <div class="counter-box"><div class="counter-num" id="cnt-years">0</div><div class="counter-label">Years</div></div>
+          <div class="counter-box"><div class="counter-num" id="cnt-months">0</div><div class="counter-label">Months</div></div>
+          <div class="counter-box"><div class="counter-num" id="cnt-days">0</div><div class="counter-label">Days</div></div>
+          <div class="counter-box"><div class="counter-num" id="cnt-hours">0</div><div class="counter-label">Hours</div></div>
+          <div class="counter-box"><div class="counter-num" id="cnt-minutes">0</div><div class="counter-label">Minutes</div></div>
+          <div class="counter-box"><div class="counter-num" id="cnt-seconds">0</div><div class="counter-label">Seconds</div></div>
+        </div>
+
+        <p style="font-family:var(--font-serif);font-style:italic;font-size:1.25rem;color:var(--text-secondary);margin-top:0.5rem;" id="together-summary-line"></p>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 11: INTERACTIVE BIRTHDAY CAKE, WISH & CONFETTI
+         =================================================================== -->
+    <section id="scene-11" class="scene-panel" aria-label="Scene 11: Birthday Cake and Wish">
+      <div style="text-align:center;max-width:680px;margin:0 auto;">
+        <p class="eyebrow">CHAPTER XI · CANDLELIGHT &amp; CONFETTI</p>
+        <h2 class="editorial-title">Make a <em>Birthday Wish</em></h2>
+        <p class="editorial-subtitle">
+          Tap each candle to light the flame, then blow into your microphone (or tap Blow Out Candles) to release your wish!
+        </p>
+
+        <!-- Wish Banner (Revealed on Blow-Out) -->
+        <div id="cake-wish-banner" style="display:none;margin:1rem auto;padding:1rem 1.4rem;border-radius:20px;background:linear-gradient(135deg,rgba(255,138,161,0.24),rgba(240,190,114,0.24));border:1px solid var(--accent-gold);box-shadow:var(--shadow-glow);">
+          <p class="script-text" style="font-size:2rem;color:var(--accent-gold);margin-bottom:0.25rem;">✨ Wish Released to the Stars! ✨</p>
+          <p id="cake-wish-text" style="font-family:var(--font-serif);font-size:1.2rem;"></p>
+        </div>
+
+        <!-- Interactive SVG Birthday Cake -->
+        <div style="position:relative;max-width:420px;margin:1rem auto;">
+          <svg id="birthday-cake-svg" viewBox="0 0 400 300" width="100%" height="270" style="overflow:visible;cursor:pointer;" onclick="lightAllCandles()">
+            <!-- Plate -->
+            <ellipse cx="200" cy="268" rx="150" ry="18" fill="#d8c3a5" opacity="0.85" />
+            <!-- Bottom Tier -->
+            <rect x="75" y="185" width="250" height="80" rx="18" fill="#f8edd9" stroke="#f0be72" stroke-width="2.5" />
+            <path d="M75 205 Q100 225 125 205 T175 205 T225 205 T275 205 T325 205" fill="none" stroke="#ff8aa1" stroke-width="6" stroke-linecap="round" />
+            <!-- Top Tier -->
+            <rect x="110" y="120" width="180" height="68" rx="14" fill="#ffe5ec" stroke="#ff8aa1" stroke-width="2.5" />
+            <path d="M110 138 Q132 155 155 138 T200 138 T245 138 T290 138" fill="none" stroke="#8e6ce8" stroke-width="5" stroke-linecap="round" />
+            <!-- 5 Interactive Candles -->
+            <g id="cake-candles-group"></g>
+          </svg>
+        </div>
+
+        <!-- Microphone Breath Meter -->
+        <div id="mic-meter-wrap" style="display:none;max-width:280px;margin:0.5rem auto 1rem;">
+          <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--accent-gold);margin-bottom:4px;">🎙️ Blow gently into microphone…</div>
+          <div style="height:8px;background:rgba(255,255,255,0.1);border-radius:99px;overflow:hidden;">
+            <div id="mic-level-bar" style="width:0%;height:100%;background:linear-gradient(90deg,var(--accent-gold),var(--accent-rose));transition:width 0.08s linear;"></div>
+          </div>
+        </div>
+
+        <!-- Cake Action Buttons -->
+        <div style="display:flex;justify-content:center;gap:0.55rem;flex-wrap:wrap;margin-top:0.75rem;">
+          <button type="button" class="btn-pill gold" onclick="lightAllCandles()">🔥 Light Candles</button>
+          <button type="button" class="btn-pill primary" onclick="blowOutCandles()">💨 Blow Out Candles</button>
+          <button type="button" class="btn-pill" id="btn-mic-blow" onclick="startMicrophoneBlowDetection()">🎙️ Use Microphone</button>
+          <button type="button" class="btn-pill" onclick="resetCakeScene()">↺ Again</button>
+          <button type="button" class="btn-pill" onclick="prevScene()">‹ Back</button>
+          <button type="button" class="btn-pill primary" onclick="nextScene()">Read Love Letter ›</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 12: LOVE LETTER (Gingham Card, Purple Bow, Tile Border, Typewriter)
+         =================================================================== -->
+    <section id="scene-12" class="scene-panel" aria-label="Scene 12: Love Letter">
+      <div class="love-letter-shell">
+        <div class="love-letter-gingham">
+          <!-- Decorative Purple Bow SVG at Top Center -->
+          <div style="text-align:center;margin-top:-2.2rem;margin-bottom:0.75rem;">
+            <svg viewBox="0 0 180 70" width="150" height="58" aria-label="Purple satin bow">
+              <path d="M90 35 C55 5 18 12 24 36 C30 58 62 48 90 35 Z" fill="#8e6ce8" stroke="#5e3dc4" stroke-width="2" />
+              <path d="M90 35 C125 5 162 12 156 36 C150 58 118 48 90 35 Z" fill="#8e6ce8" stroke="#5e3dc4" stroke-width="2" />
+              <path d="M84 38 L62 66 M96 38 L118 66" stroke="#7854d8" stroke-width="7" stroke-linecap="round" />
+              <circle cx="90" cy="35" r="10" fill="#f0be72" stroke="#5e3dc4" stroke-width="2" />
+            </svg>
+          </div>
+
+          <div class="letter-columns">
+            <!-- Left Column: Polaroid Photo + Attached Bouquet Badge -->
+            <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;">
+              <div class="polaroid-item straight" style="width:230px;animation:none;" data-editable-media="letter-polaroid" onclick="handleMediaSlotClick('letter-polaroid', 13)">
+                <div class="scrapbook-tape"></div>
+                <img id="letter-polaroid-img" alt="Love letter keepsake polaroid" src="" style="height:175px;" />
+                <div class="polaroid-caption" id="letter-polaroid-caption">Always &amp; Forever ♥</div>
+              </div>
+
+              <!-- Custom Bouquet Gift Attached from Scene 7 -->
+              <div id="letter-bouquet-gift-box" style="background:rgba(142,108,232,0.12);border:1px dashed #8e6ce8;border-radius:14px;padding:0.75rem;text-align:center;width:100%;">
+                <div style="font-family:var(--font-mono);font-size:0.68rem;color:#5e3dc4;letter-spacing:0.1em;">HAND-TIED GARDEN BOUQUET</div>
+                <canvas id="letter-mini-bouquet-canvas" width="180" height="120" style="width:150px;height:100px;margin:0.35rem auto;display:block;"></canvas>
+                <button type="button" class="btn-pill" style="font-size:0.72rem;color:#231b2e;background:#fff;" onclick="openBouquetBuilderModal()">💐 Customise Bouquet</button>
+              </div>
+            </div>
+
+            <!-- Right Column: Great Vibes & Editorial Typewriter Letter -->
+            <div>
+              <!-- Curved SVG Banner Header -->
+              <svg viewBox="0 0 420 55" width="100%" height="48" style="margin-bottom:0.25rem;">
+                <path id="letter-curve-path" d="M 15 44 Q 210 10 405 44" fill="transparent" />
+                <text font-family="DM Mono, monospace" font-size="11" fill="#6b4ec7" letter-spacing="3">
+                  <textPath href="#letter-curve-path" startOffset="50%" text-anchor="middle">
+                    SEALED WITH STARLIGHT · FOR YOUR EYES ONLY
+                  </textPath>
+                </text>
+              </svg>
+
+              <h2 id="letter-salutation" style="font-family:var(--font-script);font-size:2.55rem;color:#5e3dc4;margin-bottom:0.6rem;" data-editable-text="letterTitle">
+                My Dearest Elena,
+              </h2>
+
+              <div id="letter-typewriter-body" style="font-family:var(--font-serif);font-size:1.18rem;line-height:1.75;color:#261d32;min-height:210px;"></div>
+
+              <!-- Flower & Bow Line Decoration -->
+              <div style="margin:1.1rem 0;display:flex;align-items:center;gap:0.6rem;color:#8e6ce8;">
+                <span style="flex:1;height:1px;background:rgba(142,108,232,0.35);"></span>
+                <span>✿  ribbon &amp; rose ✿</span>
+                <span style="flex:1;height:1px;background:rgba(142,108,232,0.35);"></span>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;">
+                <div>
+                  <p style="font-family:var(--font-serif);font-style:italic;font-size:1.08rem;color:#4a3c5c;" id="letter-closing-line">Forever and a day,</p>
+                  <p style="font-family:var(--font-script);font-size:2.3rem;color:#d94b6b;" id="letter-signature-line">Julian ♥</p>
+                </div>
+                <div style="display:flex;gap:0.45rem;flex-wrap:wrap;">
+                  <button type="button" class="btn-pill" style="background:#fff;color:#231b2e;" onclick="startLetterTypewriter(true)">✎ Replay Typewriter</button>
+                  <button type="button" class="btn-pill" style="background:#fff;color:#231b2e;" onclick="completeLetterInstantly()">⚡ Show Full Text</button>
+                  <button type="button" class="btn-pill" style="background:#fff;color:#231b2e;" onclick="prevScene()">‹ Back</button>
+                  <button type="button" class="btn-pill primary" onclick="nextScene()">Music &amp; Finale ›</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         SCENE 13: MUSIC PLAYER & FINALE ("To be continued" + Replay)
+         =================================================================== -->
+    <section id="scene-13" class="scene-panel" aria-label="Scene 13: Music Player and Finale">
+      <div style="max-width:780px;margin:0 auto;text-align:center;">
+        <p class="eyebrow">CHAPTER XIII · SOUNDTRACK &amp; EPILOGUE</p>
+        <h2 class="editorial-title" id="finale-headline-text">
+          There’s <em>more</em> where that came from
+        </h2>
+        <p class="editorial-subtitle" id="finale-subtext-line" style="margin-bottom:1.5rem;">
+          To be continued… in every sunrise we haven’t watched yet.
+        </p>
+
+        <!-- Music Player Card -->
+        <div style="background:var(--bg-card);border:1px solid var(--border-gold);border-radius:26px;padding:1.6rem;max-width:540px;margin:0 auto 2rem;box-shadow:var(--shadow-soft);">
+          <div style="display:flex;align-items:center;gap:1.25rem;text-align:left;flex-wrap:wrap;">
+            <div id="music-vinyl-disc" style="width:105px;height:105px;border-radius:50%;overflow:hidden;border:3px solid var(--accent-gold);flex-shrink:0;position:relative;box-shadow:0 8px 24px rgba(0,0,0,0.5);">
+              <img id="music-cover-img" alt="Album Cover" src="" style="width:100%;height:100%;object-fit:cover;" />
+            </div>
+            <div style="flex:1;min-width:190px;">
+              <span class="eyebrow" id="music-track-index">TRACK 1 OF 3</span>
+              <h3 id="music-track-title" style="font-family:var(--font-serif);font-size:1.5rem;margin:0.15rem 0;">Midnight on the Rooftop</h3>
+              <p id="music-track-artist" style="font-size:0.86rem;color:var(--text-secondary);">Julian &amp; Elena Ensemble</p>
+            </div>
+          </div>
+
+          <!-- Progress Scrub Bar -->
+          <div style="margin:1.1rem 0 0.45rem;">
+            <input type="range" id="music-progress-range" min="0" max="100" value="0" aria-label="Track progress"
+                   style="width:100%;accent-color:var(--accent-rose);cursor:pointer;" oninput="seekMusicTrack(this.value)" />
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);">
+              <span id="music-time-current">0:00</span>
+              <span id="music-time-total">2:24</span>
+            </div>
+          </div>
+
+          <!-- Transport & Volume Controls -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;margin-top:0.5rem;">
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <button type="button" class="btn-pill" onclick="changeMusicTrack(-1)" aria-label="Previous track">⏮ Prev</button>
+              <button type="button" class="btn-pill primary" id="btn-music-play" onclick="toggleMusicPlayback()" style="padding:0.55rem 1.25rem;">▶ Play</button>
+              <button type="button" class="btn-pill" onclick="changeMusicTrack(1)" aria-label="Next track">Next ⏭</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.4rem;">
+              <span style="font-size:0.85rem;">🔈</span>
+              <input type="range" id="music-volume-range" min="0" max="100" value="75" aria-label="Volume"
+                     style="width:85px;accent-color:var(--accent-gold);cursor:pointer;" oninput="setMusicVolume(this.value)" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Orbiting Heart Finale Emblem -->
+        <div style="position:relative;width:160px;height:130px;margin:0 auto 1.25rem;">
+          <canvas id="finale-orbit-canvas" width="160" height="130" style="width:160px;height:130px;display:block;"></canvas>
+        </div>
+
+        <div style="display:flex;justify-content:center;gap:0.65rem;flex-wrap:wrap;">
+          <button type="button" class="btn-pill gold" onclick="replayEntireExperience()">↺ Replay From Beginning</button>
+          <button type="button" class="btn-pill" onclick="openFullscreenMemoriesBoard()">🗂 Open Memories Board</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Bar: Bouncing Scroll-Down Cue & Quick Scene Jump -->
+  <footer id="bottom-scene-bar">
+    <button type="button" class="btn-pill" onclick="prevScene()">‹ Prev</button>
+    <button type="button" class="scroll-down-cue" id="scroll-down-cue-btn" onclick="nextScene()">
+      <span id="scroll-cue-label">Scroll or Tap for Next Chapter</span>
+      <span>↓</span>
+    </button>
+    <button type="button" class="btn-pill" onclick="nextScene()">Next ›</button>
+  </footer>
+
+  <!-- =====================================================================
+       MODAL 1: 3D FLIP-OPEN MEMORY / LIGHTBOX MODAL (WITH VINE GROWTH)
+       ===================================================================== -->
+  <div class="modal-backdrop" id="memory-lightbox-modal" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+    <div class="modal-card" style="max-width:640px;">
+      <!-- Growing Vines SVG Frame Overlay -->
+      <svg id="lightbox-vines-svg" viewBox="0 0 640 420" width="100%" height="100%"
+           style="position:absolute;inset:0;pointer-events:none;z-index:10;overflow:visible;">
+        <path id="vine-path-left" d="M 16 400 C 8 300 26 200 14 90 C 10 35 60 16 160 16"
+              fill="none" stroke="#6abf8a" stroke-width="3" stroke-linecap="round" stroke-dasharray="520" stroke-dashoffset="520" />
+        <path id="vine-path-right" d="M 624 400 C 632 300 614 200 626 90 C 630 35 580 16 480 16"
+              fill="none" stroke="#6abf8a" stroke-width="3" stroke-linecap="round" stroke-dasharray="520" stroke-dashoffset="520" />
+      </svg>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;position:relative;z-index:12;">
+        <span class="eyebrow" id="lightbox-date-badge">FEB 14, 2022</span>
+        <button type="button" class="btn-pill" onclick="closeMemoryLightbox()">✕ Close</button>
+      </div>
+
+      <div id="lightbox-media-container" style="position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--border-gold);margin-bottom:1rem;background:#070c1a;min-height:240px;display:flex;align-items:center;justify-content:center;">
+        <img id="lightbox-img" alt="Enlarged keepsake memory" src="" style="width:100%;max-height:340px;object-fit:cover;display:block;" />
+        <canvas id="lightbox-reel-canvas" width="560" height="300" style="width:100%;height:280px;display:none;"></canvas>
+      </div>
+
+      <h3 id="lightbox-title" style="font-family:var(--font-serif);font-size:1.85rem;margin-bottom:0.35rem;">Memory Title</h3>
+      <p id="lightbox-caption" class="script-text" style="font-size:1.5rem;margin-bottom:0.5rem;"></p>
+      <p id="lightbox-story" style="font-size:0.95rem;color:var(--text-secondary);margin-bottom:1.25rem;"></p>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;position:relative;z-index:12;">
+        <button type="button" class="btn-pill primary" id="lightbox-continue-btn" onclick="followLightboxNextScene()">
+          Continue to Scene →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 2: FULLSCREEN MEMORIES BOARD OVERLAY
+       ===================================================================== -->
+  <div class="modal-backdrop" id="memories-board-modal" role="dialog" aria-modal="true" aria-label="Fullscreen Memories Board">
+    <div class="modal-card" style="max-width:1040px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+        <div>
+          <span class="eyebrow">SCRAPBOOK ARCHIVE</span>
+          <h3 style="font-family:var(--font-serif);font-size:2rem;">Our Fullscreen Memories Board</h3>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button type="button" class="btn-pill gold" onclick="addNewMemoryCardPrompt()">+ Add Photo Slot</button>
+          <button type="button" class="btn-pill" onclick="closeFullscreenMemoriesBoard()">✕ Close Board</button>
+        </div>
+      </div>
+      <div id="fullscreen-board-grid" class="memory-wall-grid"></div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 3: "MAKE A BOUQUET" MINI-GAME BUILDER
+       ===================================================================== -->
+  <div class="modal-backdrop" id="bouquet-builder-modal" role="dialog" aria-modal="true" aria-label="Make a Bouquet Mini-Game">
+    <div class="modal-card" style="max-width:620px;text-align:center;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.65rem;">
+        <span class="eyebrow">BOTANICAL ATELIER · MINI-GAME</span>
+        <button type="button" class="btn-pill" onclick="closeBouquetBuilderModal()">✕ Close</button>
+      </div>
+      <h3 style="font-family:var(--font-serif);font-size:1.9rem;margin-bottom:0.35rem;">Craft a Custom Bouquet</h3>
+      <p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:1rem;">
+        Tap flowers to add stems, pick a satin ribbon colour, then download as an image or attach inside the Love Letter!
+      </p>
+
+      <canvas id="bouquet-preview-canvas" width="420" height="300" style="width:100%;max-width:380px;height:260px;margin:0 auto 1rem;display:block;border-radius:18px;border:1px solid var(--border-gold);background:#090e1f;"></canvas>
+
+      <div style="display:flex;justify-content:center;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.75rem;">
+        <button type="button" class="btn-pill" onclick="addFlowerToBouquet('rose')">🌹 + Rose</button>
+        <button type="button" class="btn-pill" onclick="addFlowerToBouquet('tulip')">🌷 + Tulip</button>
+        <button type="button" class="btn-pill" onclick="addFlowerToBouquet('sunflower')">🌻 + Sunflower</button>
+        <button type="button" class="btn-pill" onclick="addFlowerToBouquet('lotus')">🪷 + Lotus</button>
+        <button type="button" class="btn-pill" onclick="addFlowerToBouquet('daisy')">🌼 + Daisy</button>
+        <button type="button" class="btn-pill" onclick="clearCustomBouquet()">↺ Reset</button>
+      </div>
+
+      <div style="display:flex;justify-content:center;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.1rem;">
+        <span class="eyebrow">RIBBON:</span>
+        <button type="button" class="btn-pill" onclick="setBouquetRibbon('#ff8aa1')">Rose Pink</button>
+        <button type="button" class="btn-pill" onclick="setBouquetRibbon('#f0be72')">Champagne Gold</button>
+        <button type="button" class="btn-pill" onclick="setBouquetRibbon('#8e6ce8')">Lavender Silk</button>
+      </div>
+
+      <div style="display:flex;justify-content:center;gap:0.6rem;flex-wrap:wrap;">
+        <button type="button" class="btn-pill gold" onclick="downloadBouquetPNG()">⬇ Download Bouquet PNG</button>
+        <button type="button" class="btn-pill primary" onclick="attachBouquetToLetter()">💌 Attach to Love Letter (Scene 12)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 4: EDIT MODE & CUSTOMISATION STUDIO (JSON Import/Export)
+       ===================================================================== -->
+  <div class="modal-backdrop" id="edit-studio-modal" role="dialog" aria-modal="true" aria-label="Edit Mode and Customisation Studio">
+    <div class="modal-card" style="max-width:740px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <span class="eyebrow">LIVE PERSONALISATION STUDIO</span>
+        <button type="button" class="btn-pill" onclick="closeEditStudioModal()">✕ Done</button>
+      </div>
+      <h3 style="font-family:var(--font-serif);font-size:1.85rem;margin-bottom:0.25rem;">Customise Every Detail</h3>
+      <p style="font-size:0.84rem;color:var(--accent-gold);margin-bottom:1rem;">
+        🔒 Privacy Notice: All uploaded photos, videos, and edits stay strictly on your device only.
+      </p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0.85rem;margin-bottom:1rem;">
+        <label style="display:block;font-size:0.82rem;">
+          From (Your Name)
+          <input type="text" id="edit-from-name" class="btn-pill" style="width:100%;margin-top:4px;border-radius:10px;" />
+        </label>
+        <label style="display:block;font-size:0.82rem;">
+          To (Partner Name)
+          <input type="text" id="edit-to-name" class="btn-pill" style="width:100%;margin-top:4px;border-radius:10px;" />
+        </label>
+        <label style="display:block;font-size:0.82rem;">
+          Relationship Start Date
+          <input type="date" id="edit-start-date" class="btn-pill" style="width:100%;margin-top:4px;border-radius:10px;" />
+        </label>
+        <label style="display:block;font-size:0.82rem;">
+          New Passcode (4-6 digits, hashed via SHA-256)
+          <input type="text" id="edit-new-passcode" placeholder="Leave blank to keep 0214" maxlength="6" class="btn-pill" style="width:100%;margin-top:4px;border-radius:10px;" />
+        </label>
+        <label style="display:block;font-size:0.82rem;">
+          Transition Style
+          <select id="edit-transition-style" class="btn-pill" style="width:100%;margin-top:4px;border-radius:10px;">
+            <option value="heart-wipe">Heart Wipe</option>
+            <option value="petal-wipe">Petal Wipe</option>
+            <option value="circular-reveal">Circular Reveal</option>
+            <option value="cross-fade">Cross-Fade</option>
+          </select>
+        </label>
+        <label style="display:block;font-size:0.82rem;">
+          Character Artwork Override (Optional Image/GIF)
+          <button type="button" class="btn-pill" style="width:100%;margin-top:4px;border-radius:10px;" onclick="triggerCharacterArtUpload()">Upload Couple Art/GIF</button>
+        </label>
+      </div>
+
+      <label style="display:block;font-size:0.82rem;margin-bottom:0.85rem;">
+        Birthday Wish Banner Text
+        <input type="text" id="edit-wish-text" class="btn-pill" style="width:100%;margin-top:4px;border-radius:10px;" />
+      </label>
+
+      <label style="display:block;font-size:0.82rem;margin-bottom:1rem;">
+        Love Letter Paragraphs (one paragraph per line)
+        <textarea id="edit-letter-paragraphs" rows="4" class="btn-pill" style="width:100%;margin-top:4px;border-radius:12px;white-space:pre-wrap;"></textarea>
+      </label>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+        <div style="display:flex;gap:0.45rem;flex-wrap:wrap;">
+          <button type="button" class="btn-pill primary" onclick="saveEditStudioChanges()">💾 Apply &amp; Save Changes</button>
+          <button type="button" class="btn-pill gold" onclick="exportConfigJSON()">⬇ Export config.json</button>
+          <label class="btn-pill" style="cursor:pointer;">
+            ⬆ Import JSON
+            <input type="file" accept=".json,application/json" style="display:none" onchange="importConfigJSON(event)" />
+          </label>
+        </div>
+        <button type="button" class="btn-pill" onclick="resetConfigToDefaults()">↺ Reset Defaults</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MODAL 5: README & CUSTOMISATION GUIDE
+       ===================================================================== -->
+  <div class="modal-backdrop" id="readme-guide-modal" role="dialog" aria-modal="true" aria-label="README Customisation Guide">
+    <div class="modal-card" style="max-width:680px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+        <span class="eyebrow">README · HOW TO CUSTOMISE</span>
+        <button type="button" class="btn-pill" onclick="closeReadmeModal()">✕ Close</button>
+      </div>
+      <h3 style="font-family:var(--font-serif);font-size:1.85rem;margin-bottom:0.65rem;">Customising Your Love Experience</h3>
+      <div style="font-size:0.9rem;color:var(--text-secondary);display:grid;gap:0.75rem;line-height:1.6;">
+        <p><strong>1. Passcode &amp; Security:</strong> Default code is <code>0214</code>. Only its SHA-256 hash is stored in <code>config.js</code>. To change it, replace <code>passcodeHash</code> in <code>config.js</code>.</p>
+        <p><strong>3. Editing Texts, Quiz &amp; Music:</strong> Edit <code>window.LOVE_CONFIG</code> in <code>config.js</code> to update names, relationship start date, Heart of Words vocabulary, letter paragraphs, and playlist tracks.</p>
+        <p><strong>4. Keyboard &amp; Touch Shortcuts:</strong> Use <code>←</code> / <code>→</code> or <code>Space</code> to navigate scenes, <code>S</code> to skip, <code>R</code> to replay the Midnight Rooftop sketch, and click any photo’s <strong>Continue →</strong> button in the lightbox to jump to its linked chapter.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="scenes/app.js"></script>
+</body>
+</html>
