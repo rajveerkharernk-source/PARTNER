@@ -30,8 +30,8 @@ window.LOVE_CONFIG = {
   // SHA-256 hash of "0214"
   passcodeHash: "025ac3ddef52e0aaa62896954c6fe57948a7c144cb203610499a912b832fd473",
   hints: {
-    first: "Hint: our special date — Month & Day (try 0214)",
-    second: "Friendly 2nd hint: Valentine’s Day in 4 digits → 0 2 1 4 ✨"
+    first: "Hint: our special date — Month & Day (try 1234)",
+    second: "Friendly 2nd hint: Special Day in 4 digits → 1 2 3 4 ✨"
   },
 
   // Scene 3: Heart of Words vocabulary
